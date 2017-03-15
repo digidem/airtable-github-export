@@ -1,0 +1,18 @@
+{
+  "name": "airtable-github-export",
+  "version": "1.0.0",
+  "description": "Export airtable tables to json/geojson in Github",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@mapbox/geojsonhint": "^2.0.1",
+    "airtable": "^0.4.5",
+    "dotenv": "^4.0.0",
+    "hubfs.js": "^1.0.0",
+    "run-parallel": "^1.1.6"
+  }
+}
