@@ -12,7 +12,8 @@ var config = {
   owner: process.env.GITHUB_OWNER,
   airtableToken: process.env.AIRTABLE_API_KEY,
   base: process.env.AIRTABLE_BASE_ID,
-  branch: process.env.GITHUB_BRANCH || 'master'
+  branch: process.env.GITHUB_BRANCH || 'master',
+  filename: process.env.GITHUB_FILENAME || 'data.json'
 }
 
 var hubfsOptions = {
@@ -26,6 +27,8 @@ var hubfsOptions = {
 var gh = Hubfs(hubfsOptions)
 
 var base = new Airtable({apiKey: config.airtableToken}).base(config.base)
+
+var output = {}
 
 var tasks = config.tables.map(function (tableName) {
   return function (cb) {
@@ -41,20 +44,18 @@ var tasks = config.tables.map(function (tableName) {
           id: record._rawJson.id,
           properties: record._rawJson.fields || {}
         }
-        var geometry = record.get('geometry')
+        var geometry = record.get('geometry') || record.get('Geometry')
         if (isValidGeometry(geometry)) {
           feature.geometry = geometry
-        } else if (record.get('lon') && record.get('lat')) {
+        } else if (record.get('Lon') && record.get('Lat')) {
           feature.geometry = {
             type: 'Point',
-            coordinates: [record.get('lon'), record.get('lat')]
+            coordinates: [record.get('Lon'), record.get('Lat')]
           }
         } else {
           feature.geometry = null
         }
-        if (feature.geometry || Object.keys(feature.properties).length) {
-          data.push(feature)
-        }
+        data.push(feature)
       })
       next()
     }
@@ -65,13 +66,17 @@ var tasks = config.tables.map(function (tableName) {
         type: 'FeatureCollection',
         features: data
       }
-      gh.writeFile(tableName + '.geojson', JSON.stringify(featureCollection, null, 2), {branch: config.branch}, cb)
+      output[tableName] = featureCollection
+      cb()
     }
   }
 })
 
 parallel(tasks, function (err, result) {
   if (err) return console.error(err)
+  gh.writeFile(config.filename, JSON.stringify(output, null, 2), {branch: config.branch}, function (err) {
+    if (err) return console.error(err)
+  })
 })
 
 function isValidGeometry (geom) {
