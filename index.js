@@ -44,13 +44,13 @@ var tasks = config.tables.map(function (tableName) {
           id: record._rawJson.id,
           properties: record._rawJson.fields || {}
         }
-        var geometry = record.get('geometry') || record.get('Geometry')
+        var geometry = get(record, 'geometry')
         if (isValidGeometry(geometry)) {
           feature.geometry = geometry
-        } else if (record.get('Lon') && record.get('Lat')) {
+        } else if (get(record, 'lon') && get(record, 'lat')) {
           feature.geometry = {
             type: 'Point',
-            coordinates: [record.get('Lon'), record.get('Lat')]
+            coordinates: [get(record, 'lon'), get(record, 'lat')]
           }
         } else {
           feature.geometry = null
@@ -79,6 +79,14 @@ parallel(tasks, function (err, result) {
   })
 })
 
+// Case insensitive record.get
+function get (record, fieldName) {
+  return record.get(fieldName) ||
+    record.get(fieldName.charAt(0).toUpperCase() + fieldName.slice(1)) ||
+    record.get(fieldName.toUpperCase())
+}
+
+// Check whether a given value is valid GeoJSON geometry
 function isValidGeometry (geom) {
   try {
     geom = JSON.parse(geom)
