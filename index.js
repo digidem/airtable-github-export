@@ -2,6 +2,7 @@ var Airtable = require('airtable')
 var parallel = require('run-parallel')
 var Hubfs = require('hubfs.js')
 var geojsonhint = require('@mapbox/geojsonhint')
+var deepEqual = require('deep-equal')
 
 require('dotenv').config()
 
@@ -73,11 +74,24 @@ var tasks = config.tables.map(function (tableName) {
 })
 
 parallel(tasks, function (err, result) {
-  if (err) return console.error(err)
-  gh.writeFile(config.filename, JSON.stringify(output, null, 2), {branch: config.branch}, function (err) {
-    if (err) return console.error(err)
+  if (err) return onError(err)
+  gh.readFile(config.filename, {branch: config.branch}, function (err, data) {
+    if (err) return onError(err)
+    var prev = JSON.parse(data)
+    if (deepEqual(prev, output)) {
+      return console.log('No changes from Airtable, skipping update to Github')
+    }
+    gh.writeFile(config.filename, JSON.stringify(output, null, 2), {branch: config.branch}, function (err) {
+      if (err) return onError(err)
+      console.log('Updated ' + config.owner + '/' + config.repo + '/' + config.filename + ' with latest changes from Airtable')
+    })
   })
 })
+
+function onError (err) {
+  console.error(err)
+  process.exit(1)
+}
 
 // Case insensitive record.get
 function get (record, fieldName) {
