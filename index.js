@@ -75,10 +75,17 @@ var tasks = config.tables.map(function (tableName) {
 
 parallel(tasks, function (err, result) {
   if (err) return onError(err)
-  gh.readFile(config.filename, {branch: config.branch}, function (err, data) {
-    if (err) return onError(err)
-    var prev = JSON.parse(data)
-    if (deepEqual(prev, output)) {
+  gh.readFile(config.filename, {ref: config.branch}, function (err, data) {
+    if (err) {
+      if (/not found/i.test(err) || err.notFound) {
+        data = {}
+      } else {
+        return onError(err)
+      }
+    } else {
+      data = JSON.parse(data)
+    }
+    if (deepEqual(data, output)) {
       return console.log('No changes from Airtable, skipping update to Github')
     }
     gh.writeFile(config.filename, JSON.stringify(output, null, 2), {branch: config.branch}, function (err) {
