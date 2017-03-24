@@ -3,6 +3,7 @@ var parallel = require('run-parallel')
 var Hubfs = require('hubfs.js')
 var geojsonhint = require('@mapbox/geojsonhint')
 var deepEqual = require('deep-equal')
+var rewind = require('geojson-rewind')
 
 require('dotenv').config()
 
@@ -49,15 +50,16 @@ var tasks = config.tables.map(function (tableName) {
           id: record._rawJson.id,
           properties: record._rawJson.fields || {}
         }
-        var geometry = get(record, 'geometry')
-        if (isValidGeometry(geometry)) {
-          feature.geometry = JSON.parse(geometry)
+        var geometry = parseGeometry(get(record, 'geometry'))
+        var coords = parseCoords([get(record, 'lon'), get(record, 'lat')])
+        if (geometry) {
+          feature.geometry = geometry
           delete feature.properties.geometry
           delete feature.properties.Geometry
-        } else if (get(record, 'lon') && get(record, 'lat')) {
+        } else if (coords) {
           feature.geometry = {
             type: 'Point',
-            coordinates: [get(record, 'lon'), get(record, 'lat')]
+            coordinates: coords
           }
         } else {
           feature.geometry = null
@@ -114,14 +116,21 @@ function get (record, fieldName) {
     record.get(fieldName.toUpperCase())
 }
 
-// Check whether a given value is valid GeoJSON geometry
-function isValidGeometry (geom) {
+// Try to parse a geometry field if it is valid GeoJSON geometry
+function parseGeometry (geom) {
+  if (!geom) return null
   try {
-    geom = JSON.parse(geom)
+    geom = rewind(JSON.parse(geom))
   } catch (e) {
-    return false
+    return null
   }
   var errors = geojsonhint.hint(geom)
-  if (errors && errors.length) return false
-  return true
+  if (errors && errors.length) return null
+  return geom
+}
+
+function parseCoords (coords) {
+  if (typeof coords[0] !== 'number' || typeof coords[1] !== 'number') return null
+  if (coords[0] < -180 || coords[0] > 180 || coords[1] < -90 || coords[1] > 90) return null
+  return coords
 }

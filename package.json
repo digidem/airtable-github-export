@@ -13,6 +13,7 @@
     "airtable": "^0.4.5",
     "deep-equal": "^1.0.1",
     "dotenv": "^4.0.0",
+    "geojson-rewind": "^0.2.0",
     "hubfs.js": "^1.0.0",
     "run-parallel": "^1.1.6"
   },
