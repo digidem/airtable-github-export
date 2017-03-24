@@ -4,6 +4,7 @@ var Hubfs = require('hubfs.js')
 var geojsonhint = require('@mapbox/geojsonhint')
 var deepEqual = require('deep-equal')
 var rewind = require('geojson-rewind')
+var debug = require('debug')('airtable-github-export')
 
 require('dotenv').config()
 
@@ -17,6 +18,9 @@ var config = {
   branch: process.env.GITHUB_BRANCH || 'master',
   filename: process.env.GITHUB_FILENAME || 'data.json'
 }
+
+var CREATE_MESSAGE = '[AIRTABLE-GITHUB-EXPORT] create ' + config.filename
+var UPDATE_MESSAGE = '[AIRTABLE-GITHUB-EXPORT] update ' + config.filename
 
 var hubfsOptions = {
   owner: config.owner,
@@ -84,22 +88,22 @@ var tasks = config.tables.map(function (tableName) {
 parallel(tasks, function (err, result) {
   if (err) return onError(err)
   gh.readFile(config.filename, {ref: config.branch}, function (err, data) {
-    if (err) {
-      if (/not found/i.test(err) || err.notFound) {
-        data = {}
-      } else {
-        return onError(err)
-      }
+    if (err && !(/not found/i.test(err) || err.notFound)) {
+      return onError(err)
     } else {
       data = JSON.parse(data)
     }
-    if (deepEqual(data, output)) {
-      return console.log('No changes from Airtable, skipping update to Github')
+    if (data && deepEqual(data, output)) {
+      return debug('No changes from Airtable, skipping update to Github')
     }
-
-    gh.writeFile(config.filename, JSON.stringify(output, null, 2), {branch: config.branch}, function (err) {
+    var opts = {
+      message: data ? UPDATE_MESSAGE : CREATE_MESSAGE,
+      branch: config.branch
+    }
+    gh.writeFile(config.filename, JSON.stringify(output, null, 2), opts, function (err) {
       if (err) return onError(err)
-      console.log('Updated ' + config.owner + '/' + config.repo + '/' + config.filename + ' with latest changes from Airtable')
+      debug('Updated ' + config.owner + '/' + config.repo + '/' + config.filename +
+        ' with latest changes from Airtable')
     })
   })
 })
@@ -129,6 +133,7 @@ function parseGeometry (geom) {
   return geom
 }
 
+// Check whether coordinates are valid
 function parseCoords (coords) {
   if (typeof coords[0] !== 'number' || typeof coords[1] !== 'number') return null
   if (coords[0] < -180 || coords[0] > 180 || coords[1] < -90 || coords[1] > 90) return null

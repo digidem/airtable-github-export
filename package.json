@@ -11,6 +11,7 @@
   "dependencies": {
     "@mapbox/geojsonhint": "^2.0.1",
     "airtable": "^0.4.5",
+    "debug": "^2.6.3",
     "deep-equal": "^1.0.1",
     "dotenv": "^4.0.0",
     "geojson-rewind": "^0.2.0",
