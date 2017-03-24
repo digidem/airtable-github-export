@@ -51,7 +51,9 @@ var tasks = config.tables.map(function (tableName) {
         }
         var geometry = get(record, 'geometry')
         if (isValidGeometry(geometry)) {
-          feature.geometry = geometry
+          feature.geometry = JSON.parse(geometry)
+          delete feature.properties.geometry
+          delete feature.properties.Geometry
         } else if (get(record, 'lon') && get(record, 'lat')) {
           feature.geometry = {
             type: 'Point',
@@ -92,6 +94,7 @@ parallel(tasks, function (err, result) {
     if (deepEqual(data, output)) {
       return console.log('No changes from Airtable, skipping update to Github')
     }
+
     gh.writeFile(config.filename, JSON.stringify(output, null, 2), {branch: config.branch}, function (err) {
       if (err) return onError(err)
       console.log('Updated ' + config.owner + '/' + config.repo + '/' + config.filename + ' with latest changes from Airtable')
