@@ -1,0 +1,46 @@
+{
+  "name": "Airtable Github Export",
+  "description": "Export airtable tables to json/geojson in Github",
+  "keywords": [
+    "airtable",
+    "maps",
+    "github",
+    "export"
+  ],
+  "formation": {
+    "web": {
+      "quantity": 0
+    }
+  },
+  "addons": [
+    "scheduler:standard"
+  ],
+  "env": {
+    "AIRTABLE_API_KEY": {
+      "description": "Airtable API key https://airtable.com/account"
+    },
+    "AIRTABLE_BASE_ID": {
+      "description": "Airtable base ID, from the API page for your base https://airtable.com/api"
+    },
+    "GITHUB_BRANCH": {
+      "description": "Github branch to save your data (default master)",
+      "value": "master"
+    },
+    "GITHUB_FILENAME": {
+      "description": "Filename and path for output file on Github",
+      "value": "data.json"
+    },
+    "GITHUB_OWNER": {
+      "description": "Username of the owner of the repo for output file on Github"
+    },
+    "GITHUB_REPO": {
+      "description": "Name of repo for output file on Github"
+    },
+    "GITHUB_TOKEN": {
+      "description": "Github personal access token from https://github.com/settings/tokens"
+    },
+    "TABLES": {
+      "description": "Comma separated list of table names to include in the export"
+    }
+  }
+}

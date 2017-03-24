@@ -27,6 +27,12 @@ GITHUB_FILENAME=filename_for_github_export
 
 Run the export with `node airtable-export.js`
 
+We run this as a scheduled task on Heroku, and you can do the same by using the deploy button below:
+
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy)
+
+Once the app is deployed visit the 'Resources' page for your app on the Heroku dashboard, make sure the dynos are turned off, and configure the scheduler to run the export command `node airtable-export.js` at the schedule of your preference.
+
 ## Contribute
 
 PRs accepted.

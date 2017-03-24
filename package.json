@@ -3,6 +3,7 @@
   "version": "1.0.0",
   "description": "Export airtable tables to json/geojson in Github",
   "main": "airtable-export.js",
+  "bin": "airtable-export.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
