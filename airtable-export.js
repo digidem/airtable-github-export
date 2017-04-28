@@ -88,8 +88,10 @@ var tasks = config.tables.map(function (tableName) {
 parallel(tasks, function (err, result) {
   if (err) return onError(err)
   gh.readFile(config.filename, {ref: config.branch}, function (err, data) {
-    if (err && !(/not found/i.test(err) || err.notFound)) {
-      return onError(err)
+    if (err) {
+      if (!(/not found/i.test(err) || err.notFound)) {
+        return onError(err)
+      }
     } else {
       data = JSON.parse(data)
     }
