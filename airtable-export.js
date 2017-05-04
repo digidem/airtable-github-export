@@ -15,7 +15,7 @@ var config = {
   owner: process.env.GITHUB_OWNER,
   airtableToken: process.env.AIRTABLE_API_KEY,
   base: process.env.AIRTABLE_BASE_ID,
-  branch: process.env.GITHUB_BRANCH || 'master',
+  branches: process.env.GITHUB_BRANCH ? process.env.GITHUB_BRANCH.split(',') : ['master'],
   filename: process.env.GITHUB_FILENAME || 'data.json'
 }
 
@@ -87,7 +87,7 @@ var tasks = config.tables.map(function (tableName) {
 
 parallel(tasks, function (err, result) {
   if (err) return onError(err)
-  gh.readFile(config.filename, {ref: config.branch}, function (err, data) {
+  gh.readFile(config.filename, {ref: config.branches[0]}, function (err, data) {
     if (err) {
       if (!(/not found/i.test(err) || err.notFound)) {
         return onError(err)
@@ -98,17 +98,30 @@ parallel(tasks, function (err, result) {
     if (data && deepEqual(data, output)) {
       return debug('No changes from Airtable, skipping update to Github')
     }
-    var opts = {
-      message: data ? UPDATE_MESSAGE : CREATE_MESSAGE,
-      branch: config.branch
-    }
-    gh.writeFile(config.filename, JSON.stringify(output, null, 2), opts, function (err) {
+    var message = data ? UPDATE_MESSAGE : CREATE_MESSAGE
+    ghWrite(config.filename, output, config.branches, message, function (err) {
       if (err) return onError(err)
       debug('Updated ' + config.owner + '/' + config.repo + '/' + config.filename +
         ' with latest changes from Airtable')
     })
   })
 })
+
+function ghWrite (filename, data, branches, message, cb) {
+  var pending = branches.length
+  branches.forEach(function (branch) {
+    var opts = {
+      message: message,
+      branch: branch
+    }
+    gh.writeFile(filename, JSON.stringify(data, null, 2), opts, done)
+  })
+  function done (err) {
+    if (err) return cb(err)
+    if (--pending > 0) return
+    cb()
+  }
+}
 
 function onError (err) {
   console.error(err)
