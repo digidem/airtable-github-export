@@ -130,9 +130,13 @@ function onError (err) {
 
 // Case insensitive record.get
 function get (record, fieldName) {
-  return record.get(fieldName) ||
-    record.get(fieldName.charAt(0).toUpperCase() + fieldName.slice(1)) ||
-    record.get(fieldName.toUpperCase())
+  if (typeof record.get(fieldName) !== 'undefined') {
+    return record.get(fieldName)
+  } else if (typeof record.get(fieldName.charAt(0).toUpperCase() + fieldName.slice(1)) !== 'undefined') {
+    return record.get(fieldName.charAt(0).toUpperCase() + fieldName.slice(1))
+  } else if (typeof record.get(fieldName.toUpperCase()) !== 'undefined') {
+    return record.get(fieldName.toUpperCase())
+  }
 }
 
 // Try to parse a geometry field if it is valid GeoJSON geometry
