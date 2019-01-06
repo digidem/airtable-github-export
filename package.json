@@ -17,6 +17,7 @@
     "dotenv": "^4.0.0",
     "geojson-rewind": "^0.2.0",
     "hubfs.js": "^1.0.0",
+    "json-stable-stringify": "^1.0.1",
     "run-parallel": "^1.1.6"
   },
   "devDependencies": {},
