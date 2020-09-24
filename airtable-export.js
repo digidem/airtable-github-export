@@ -5,6 +5,7 @@ var geojsonhint = require('@mapbox/geojsonhint')
 var deepEqual = require('deep-equal')
 var rewind = require('geojson-rewind')
 var debug = require('debug')('airtable-github-export')
+var stringify = require('json-stable-stringify')
 
 require('dotenv').config()
 
@@ -114,7 +115,7 @@ function ghWrite (filename, data, branches, message, cb) {
       message: message,
       branch: branch
     }
-    gh.writeFile(filename, JSON.stringify(data, null, 2), opts, done)
+    gh.writeFile(filename, stringify(data, { replacer: null, space: 2 }), opts, done)
   })
   function done (err) {
     if (err) return cb(err)
