@@ -11,7 +11,7 @@
   "license": "MIT",
   "dependencies": {
     "@mapbox/geojsonhint": "^2.0.1",
-    "airtable": "^0.4.5",
+    "airtable": "^0.10.0",
     "debug": "^2.6.3",
     "deep-equal": "^1.0.1",
     "dotenv": "^4.0.0",
