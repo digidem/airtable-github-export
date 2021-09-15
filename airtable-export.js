@@ -174,7 +174,7 @@ function isUrl(value) {
  * timestamp to the URLs returned from the API which changes every time */
 function customComparison (objValue, othValue) {
   // if neither is a URL, return undefined to use default comparison
-  if ((!isUrl(objValue) && isUrl(othValue))) return
+  if (!(isUrl(objValue) && isUrl(othValue))) return
   const objUrl = new URL(objValue)
   const othUrl = new URL(othValue)
   objUrl.search = ''
