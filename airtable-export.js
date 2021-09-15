@@ -3,7 +3,7 @@ var parallel = require('run-parallel')
 var Hubfs = require('hubfs.js')
 var geojsonhint = require('@mapbox/geojsonhint')
 var deepEqual = require('deep-equal')
-var rewind = require('geojson-rewind')
+var rewind = require('@mapbox/geojson-rewind')
 var debug = require('debug')('airtable-github-export')
 var stringify = require('json-stable-stringify')
 
