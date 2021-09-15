@@ -2,7 +2,7 @@ var Airtable = require('airtable')
 var parallel = require('run-parallel')
 var Hubfs = require('hubfs.js')
 var geojsonhint = require('@mapbox/geojsonhint')
-var deepEqual = require('deep-equal')
+var isEqualWith = require('lodash/isEqualWith')
 var rewind = require('@mapbox/geojson-rewind')
 var debug = require('debug')('airtable-github-export')
 var stringify = require('json-stable-stringify')
@@ -96,7 +96,7 @@ parallel(tasks, function (err, result) {
     } else {
       data = JSON.parse(data)
     }
-    if (data && deepEqual(data, output)) {
+    if (data && isEqualWith(data, output, customComparison)) {
       return debug('No changes from Airtable, skipping update to Github')
     }
     var message = data ? UPDATE_MESSAGE : CREATE_MESSAGE
@@ -158,4 +158,26 @@ function parseCoords (coords) {
   if (typeof coords[0] !== 'number' || typeof coords[1] !== 'number') return null
   if (coords[0] < -180 || coords[0] > 180 || coords[1] < -90 || coords[1] > 90) return null
   return coords
+}
+
+function isUrl(value) {
+  if (typeof value !== 'string') return false
+  try {
+    new URL(value)
+    return true
+  } catch (e) {
+    return false
+  }
+}
+
+/** For URLs, ignore the query string when comparing, because Airtable adds a
+ * timestamp to the URLs returned from the API which changes every time */
+function customComparison (objValue, othValue) {
+  // if neither is a URL, return undefined to use default comparison
+  if ((!isUrl(objValue) && isUrl(othValue))) return
+  const objUrl = new URL(objValue)
+  const othUrl = new URL(othValue)
+  objUrl.search = ''
+  othUrl.search = ''
+  return objUrl.toString() === othUrl.toString()
 }

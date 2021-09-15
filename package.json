@@ -14,10 +14,10 @@
     "@mapbox/geojsonhint": "^2.0.1",
     "airtable": "^0.11.1",
     "debug": "^2.6.3",
-    "deep-equal": "^1.0.1",
     "dotenv": "^4.0.0",
     "hubfs.js": "^1.0.0",
     "json-stable-stringify": "^1.0.1",
+    "lodash": "^4.17.21",
     "run-parallel": "^1.1.6"
   },
   "devDependencies": {},
